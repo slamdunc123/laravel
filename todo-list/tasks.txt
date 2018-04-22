@@ -1,0 +1,85 @@
+
+create layout page (bootstrap) - app.blade.php 
+
+create resource controller - TodosController.php
+    - php artisan make:controller TodosController --resource
+
+create route to TodosController - web.php
+    - Route::resource('todo', 'TodosController');
+
+create home page to display all Todo list items - home.balde.php
+    - add to TodosController
+
+create create page to create new Todo List item - create.blade.php
+    - create form with textarea and submit button
+    - add to TodosController
+
+create csrf field in form - create.blade.php
+
+create form action - create.blade.php
+    - php artisan route:list
+    - <!--<form class="form-horizontal" action="/todo" method="post">-->
+
+create migration
+    - create database in phpMyAdmin
+    - add database credentials to .env file
+    - add name="body" to form textarea - create.blade.php
+    - php artisan make:model todo -m (this creates a model and a migration)
+    - php artisan migrate
+
+create save to database - TodosController.php
+    - add model - use App\todo;
+    - update store() function:
+        //return $request->all();
+        $todo = new todo;
+        $todo->body = $request->body;
+        $todo->save();
+        return redirect('todo');
+
+create read from database - TodosController.php
+    - update index() function:
+        $todos = todo::all();
+        return view('todo/home', compact('todos'));
+    -add @foreach to fetch and display database entries - home.blade.php
+        <ul class="list-group">
+            @foreach ($todos as $todo)           
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <!--This is first item-->
+                    {{$todo->body}}
+                    <span class="pull-right">{{$todo->created_at}}</span>
+                </li>
+            @endforeach           
+        </ul>
+    - change time created to time elapsed since post created using carbon diffForHumans() - home.blade.php
+            {{$todo->body}}
+            <span class="pull-right">{{$todo->created_at->diffForHumans()}}</span>
+
+create validation for form entry - TodosController.php
+    - amend store() function:
+        //return $request->all();
+        $todo = new todo;
+        $this->validate($request,[
+            'body'=>'required|unique:todos',     //required unique value in todos table
+        ]);
+        $todo->body = $request->body;
+        $todo->save();
+        return redirect('todo');
+
+create errors display - create.blade.php
+    - add after </form>
+        @if(count($errors)>0)
+        <div class="alert alert-danger">
+            @foreach($errors->all() as $error)
+            {{$error}}
+            @endforeach
+        </div>
+        @endif
+
+
+    
+
+
+
+
+
+
